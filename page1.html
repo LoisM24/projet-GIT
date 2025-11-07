@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini-Jeux Fun 🎮</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #1b1b3a, #3a1b1b);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 30px;
+      font-size: 2em;
+      background: rgba(255, 255, 255, 0.1);
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 40px 0;
+      max-width: 1200px;
+    }
+    .game {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s;
+    }
+    .game:hover {
+      transform: scale(1.05);
+    }
+    button {
+      background: #ff4081;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #ff79b0;
+    }
+    #ticTacToe-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 5px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .cell {
+      background: rgba(255,255,255,0.2);
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>🎮 Mini-Jeux Fun</header>
+  
+  <section>
+    <!-- Jeu du clic rapide -->
+    <div class="game" id="clickGame">
+      <h2>🖱️ Jeu du clic rapide</h2>
+      <p>Cliquer un maximum de fois en 5 secondes !</p>
+      <button id="startClick">Commencer</button>
+      <p id="clickCount">Clics : 0</p>
+    </div>
+
+    <!-- Jeu du morpion -->
+    <div class="game" id="ticTacToe">
+      <h2>❌⭕ Morpion</h2>
+      <div id="ticTacToe-grid"></div>
+      <p id="ticMessage"></p>
+      <button id="restartTic">Rejouer</button>
+    </div>
+
+    <!-- Devine le nombre -->
+    <div class="game" id="guessNumber">
+      <h2>🔢 Devine le nombre</h2>
+      <p>Choisis un nombre entre 1 et 100</p>
+      <input type="number" id="guessInput" min="1" max="100">
+      <button id="guessBtn">Deviner</button>
+      <p id="guessMsg"></p>
+    </div>
+  </section>
+
+  <script>
+    /* ---------- Jeu du clic rapide ---------- */
+    let clicks = 0, timer;
+    document.getElementById('startClick').onclick = () => {
+      clicks = 0;
+      document.getElementById('clickCount').textContent = "Clics : 0";
+      document.getElementById('startClick').disabled = true;
+      document.body.onclick = () => clicks++;
+      timer = setTimeout(() => {
+        document.body.onclick = null;
+        document.getElementById('clickCount').textContent = "Score final : " + clicks;
+        document.getElementById('startClick').disabled = false;
+      }, 5000);
+    };
+
+    /* ---------- Morpion ---------- */
+    const grid = document.getElementById('ticTacToe-grid');
+    const msg = document.getElementById('ticMessage');
+    const restartBtn = document.getElementById('restartTic');
+    let board, currentPlayer;
+    
+    function startTicTacToe() {
+      board = Array(9).fill('');
+      currentPlayer = '❌';
+      msg.textContent = "Tour de " + currentPlayer;
+      grid.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.onclick = () => play(i, cell);
+        grid.appendChild(cell);
+      }
+    }
+    function play(i, cell) {
+      if (board[i] || checkWin()) return;
+      board[i] = currentPlayer;
+      cell.textContent = currentPlayer;
+      if (checkWin()) {
+        msg.textContent = currentPlayer + " a gagné !";
+      } else if (board.every(Boolean)) {
+        msg.textContent = "Égalité !";
+      } else {
+        currentPlayer = currentPlayer === '❌' ? '⭕' : '❌';
+        msg.textContent = "Tour de " + currentPlayer;
+      }
+    }
+    function checkWin() {
+      const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      return w.some(([a,b,c]) => board[a] && board[a]===board[b] && board[a]===board[c]);
+    }
+    restartBtn.onclick = startTicTacToe;
+    startTicTacToe();
+
+    /* ---------- Devine le nombre ---------- */
+    const number = Math.floor(Math.random()*100)+1;
+    const guessBtn = document.getElementById('guessBtn');
+    const guessMsg = document.getElementById('guessMsg');
+    guessBtn.onclick = () => {
+      const val = parseInt(document.getElementById('guessInput').value);
+      if (isNaN(val)) return;
+      if (val === number) guessMsg.textContent = "🎉 Bravo ! Le nombre était " + number;
+      else if (val < number) guessMsg.textContent = "Trop petit !";
+      else guessMsg.textContent = "Trop grand !";
+    };
+  </script>
+</body>
+</html>
